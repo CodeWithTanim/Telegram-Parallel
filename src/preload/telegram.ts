@@ -19,13 +19,20 @@ const injectNotificationOverride = () => {
       
       class PatchedNotification extends EventTarget {
         static get permission() {
-          return OriginalNotification.permission;
+          return OriginalNotification.permission || 'granted';
         }
         static requestPermission(callback) {
-          return OriginalNotification.requestPermission(callback);
+          if (typeof callback === 'function') callback('granted');
+          return Promise.resolve('granted');
         }
         constructor(title, options) {
           super();
+          this._title = title;
+          this._options = options || {};
+          this.onclick = null;
+          this.onclose = null;
+          this.onerror = null;
+          this.onshow = null;
           try {
             if (typeof window.ipcNotify === 'function') {
               window.ipcNotify(title, options || {});
@@ -33,6 +40,21 @@ const injectNotificationOverride = () => {
           } catch (e) {
             console.error('Failed to send notification via IPC:', e);
           }
+        }
+        close() {
+          // Native desktop notification handles its own lifecycle
+        }
+        get title() {
+          return this._title;
+        }
+        get body() {
+          return this._options?.body || '';
+        }
+        get icon() {
+          return this._options?.icon || '';
+        }
+        get tag() {
+          return this._options?.tag || '';
         }
       }
       
@@ -54,31 +76,27 @@ if (document.documentElement) {
 
 // Observer for document title changes to capture and report the unread message count
 const setupTitleObserver = () => {
-  const titleEl = document.querySelector('title')
-  if (!titleEl) {
-    // Retry shortly if the title element isn't in the DOM yet
-    setTimeout(setupTitleObserver, 500)
-    return
-  }
-
   const reportUnreadCount = () => {
-    const title = document.title
-    const match = title.match(/\((\d+)\)/)
-    const count = match ? parseInt(match[1], 10) : 0
-    ipcRenderer.send('update-unread-count', { count })
+    const title = document.title || ''
+    const match = title.match(/\(([0-9,]+)\)/)
+    const count = match ? parseInt(match[1].replace(/,/g, ''), 10) : 0
+    ipcRenderer.send('update-unread-count', { count: Math.max(0, count || 0) })
   }
 
-  const observer = new MutationObserver(() => {
-    reportUnreadCount()
-  })
+  // Observe head or root for title element changes
+  const target = document.head || document.documentElement
+  if (target) {
+    const observer = new MutationObserver(() => {
+      reportUnreadCount()
+    })
+    observer.observe(target, { childList: true, characterData: true, subtree: true })
+  }
 
-  observer.observe(titleEl, { childList: true, characterData: true, subtree: true })
-  
   // Initial check
   reportUnreadCount()
 }
 
-// Initialize title observer once the document is loaded
+// Initialize title observer once document is interactive
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', setupTitleObserver)
 } else {
