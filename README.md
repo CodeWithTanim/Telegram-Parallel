@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="resources/icon.png" alt="Telegram-Parallel Logo" width="200" height="200">
+  <img src="resources/icon.png" alt="Telegram-Parallel Logo" width="180" height="180">
 </p>
 <br>
 
 <h1 align="center">✈️ Telegram-Parallel</h1>
 
 <p align="center">
-  <strong>Run and manage multiple Telegram accounts in one lightweight desktop application. Built with Electron + Vite + Tailwind CSS for a seamless, modern messaging experience.</strong>
+  <strong>Run, isolate, and manage multiple Telegram accounts concurrently in one high-performance desktop application. Built with Electron + Vite + React 19 + Tailwind CSS.</strong>
 </p>
 
 <p align="center">
@@ -22,86 +22,153 @@
 
 ## 📖 Overview
 
-**Telegram-Parallel** is a high-performance desktop client designed for power users who need to balance multiple Telegram accounts simultaneously. Whether it's personal, work, or support accounts, this application allows you to switch between them instantly without the friction of multiple browser tabs or logging in/out.
+**Telegram-Parallel** is an ultra-fast, modern desktop client engineered for power users, community managers, and professionals who manage multiple Telegram accounts simultaneously.
 
-Built on the **Electron-Vite** ecosystem, it provides a native-feeling experience with minimal resource overhead, ensuring your system stays fast even with several accounts active.
+Unlike traditional multi-instance setups or cluttered browser windows, **Telegram-Parallel** isolates every session into its own dedicated Electron `WebContentsView` partition. Cookies, credentials, and local cache never collide, allowing you to run all your Telegram accounts concurrently within a single unified workspace.
 
 ---
 
-## ✨ Key Features
+## ✨ Core Features
 
-- 🔄 **Unlimited Multi-Account Support**: Add and manage as many Telegram accounts as you need.
-- ⚡ **Instant Switching**: A sleek sidebar allows for rapid account transitions with zero lag.
-- 🎨 **Premium UI/UX**: Crafted with Tailwind CSS and Framer Motion for a "glassmorphic" and responsive dark-mode design.
-- 🔒 **Session Isolation**: Every account uses a separate persistent Electron partition, keeping your session data and logins completely separate and secure.
-- 📊 **Real-time Monitoring**: Automatically tracks unread message badges for each active account.
-- 📦 **Desktop Native Integration**:
-  - 🖥️ **System Integration**: Smooth, frameless window setup with custom titlebar draggable regions.
-  - 🚀 **Auto-Startup**: Option to start automatically with Windows.
-  - 🔔 **Native Notifications**: Real-time alerts for active accounts.
+### 🗂️ Account Selection Hub (Default Mode)
+
+- **Zero-Accidental Opening**: Launches into a clean, modern workspace hub instead of automatically loading a session.
+- **Visual Account Cards**: Displays all connected accounts with custom avatars, real-time connection status, unread counters, and one-click session launch buttons.
+- **Instant Hub Return**: Easily return to the selection hub at any time using the sidebar hub button, topbar breadcrumb, or `Ctrl+0`.
+
+### 🔒 Strict Session Partition Sandboxing
+
+- **Zero Cross-Contamination**: Each account runs within an isolated partition (`persist:tg_account_${id}`).
+- **Persistent Logins**: Sessions remain active across reboots and application updates without re-authentication.
+- **Privacy First**: Deleting an account completely purges its cookies, cache, and indexed storage from disk.
+
+### 🍃 RAM Saver (Session Sleeping)
+
+- **Free up Memory on Demand**: Put background accounts to sleep with a single click to save 300MB–500MB of RAM per session.
+- **Instant Wake-Up**: Wakes instantly back up into the active workspace when selected.
+
+### 🖼️ Custom Avatar Studio & Cropper
+
+- **Native OS File Dialog**: Pick avatar images (`.png`, `.jpg`, `.jpeg`, `.webp`) directly through your system file picker.
+- **Interactive Cropping Modal**: Smooth zoom and pan controls powered by `react-easy-crop`.
+- **Performance Optimized**: Automatically crops and downscales to 128x128 on an in-memory canvas to preserve disk space and memory.
+
+### 🔔 Native Notifications & Badges
+
+- **Background Interception**: Telegram Web notifications are seamlessly intercepted and forwarded to the native OS notification system.
+- **Click-to-Focus**: Clicking an OS notification instantly brings Telegram-Parallel to the foreground and switches directly to that specific account.
+- **Real-Time Unread Counters**: Dynamically parses unread messages from title mutations and displays dock/taskbar notification badges.
+
+### 🛡️ Crash Resilience & Auto-Recovery
+
+- **Automatic Process Recovery**: If a background Telegram Web instance crashes due to system constraints, the application automatically restarts and recovers the session silently.
+- **Network Auto-Reconnect**: Automatically retries loading when internet connectivity is restored.
+- **Smart URL Routing**: Opens Telegram authentication and bot popups (`oauth.telegram.org`) within the authenticated session while routing all external links to your default system browser.
+
+### 📥 System Tray & Background Execution
+
+- **Close-to-Tray**: Minimizing or closing the window keeps your accounts alive in the system tray so you never miss a message.
+- **Quick Tray Menu**: Show/hide the application or exit cleanly through the tray context menu.
+
+### 🎨 Modern Aurora Glassmorphism Design
+
+- **Tailwind CSS v3**: Tailored aurora dark theme (`#07090e`) with electric cyan (`#00D2FF`), Telegram blue (`#24A1DE`), and vibrant indigo accents.
+- **Fluid Micro-Animations**: Smooth layout transitions and hover physics built with Framer Motion.
+- **Collapsible Sidebar**: Collapse the sidebar to enjoy an expansive, full-width chat interface.
+
+---
+
+## ⌨️ Desktop Keyboard Shortcuts
+
+| Shortcut                                                       | Action                                                                |
+| :------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| <kbd>Escape</kbd>                                              | Close any active modal (Settings, Add Account, Edit Profile, Cropper) |
+| <kbd>Ctrl</kbd> + <kbd>0</kbd> / <kbd>Cmd</kbd> + <kbd>0</kbd> | Return to the **Account Selection Hub**                               |
+| <kbd>Ctrl</kbd> + <kbd>1</kbd> to <kbd>9</kbd>                 | Instantly switch directly to Account 1 through 9                      |
+| <kbd>Alt</kbd> + <kbd>F4</kbd>                                 | Minimize to system tray (keeps sessions alive in background)          |
 
 ---
 
 ## 🛠️ Technical Stack
 
-- **Framework**: [Electron.js](https://www.electronjs.org/) for cross-platform desktop capabilities.
-- **Frontend**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/) + [TypeScript](https://www.typescriptlang.org/).
-- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/) for a modern, utility-first design system.
-- **Persistence**: [electron-store](https://github.com/sindresorhus/electron-store) for lightweight, secure settings and account configuration persistence.
-- **Animations**: [Framer Motion](https://www.framer.com/motion/) for smooth micro-interactions.
+- **Desktop Framework**: [Electron 39](https://www.electronjs.org/) (Multi-process `WebContentsView` architecture).
+- **Bundler & Tooling**: [electron-vite 7](https://electron-vite.org/) + [Vite](https://vitejs.dev/).
+- **Frontend Engine**: [React 19](https://react.dev/) + [TypeScript 5](https://www.typescriptlang.org/).
+- **Styling**: [Tailwind CSS v3](https://tailwindcss.com/) with custom glassmorphism filters.
+- **Animations**: [Framer Motion](https://www.framer.com/motion/).
+- **Icons**: [Lucide React](https://lucide.dev/).
+- **Image Cropper**: [react-easy-crop](https://github.com/ValentinH/react-easy-crop).
+- **Settings & Config Storage**: [electron-store](https://github.com/sindresorhus/electron-store).
 
 ---
 
-## 📁 Project Structure
+## 📁 Repository Structure
 
-```bash
+```
 Telegram-Parallel
 ├── 📁 src
-│   ├── 📁 main           # Electron Main Process (System integration & window management)
-│   ├── 📁 preload        # Bridge between System and Web (IPC Communication)
-│   └── 📁 renderer       # React Frontend (UI & Logic)
-│       ├── 📁 src
-│       │   ├── 📁 assets  # Stylesheets, icons, and logo assets
-│       │   ├── 📁 components # Versions display helper component
-│       │   └── 📄 App.tsx     # Main application interface and account controller
-├── ⚙️ electron-builder.yml # Packaging configuration
-├── ⚙️ electron.vite.config.ts # Build system config
-└── 📄 package.json       # Project dependencies & scripts
+│   ├── 📁 main                      # Electron Main Process
+│   │   ├── 📄 index.ts              # Window lifecycle, System Tray, deep links
+│   │   └── 📄 accountManager.ts     # WebContentsView sandboxing, RAM Saver, IPC
+│   ├── 📁 preload                   # Isolated Preload Layer
+│   │   ├── 📄 index.ts              # Strongly-typed contextBridge API
+│   │   ├── 📄 index.d.ts            # Type definitions for window.api
+│   │   └── 📄 telegram.ts           # Telegram DOM title observer & notification patch
+│   └── 📁 renderer                  # React 19 Frontend
+│       ├── 📄 index.html            # CSP-secured root template
+│       └── 📁 src
+│           ├── 📁 components        # AvatarCropperModal, EditAccountModal
+│           ├── 📁 utils             # cn helper, canvas cropImage utility
+│           ├── 📄 App.tsx           # Hub, switcher, sidebar, and layout controller
+│           └── 📄 index.css         # Aurora theme tokens & glassmorphic utilities
+├── ⚙️ electron.vite.config.ts        # Vite multi-bundle configuration
+├── ⚙️ electron-builder.yml          # Multi-platform installer packaging
+├── 📄 AGENTS.md                     # Architecture specification & contributor rules
+└── 📄 package.json                  # Dependencies & scripts
 ```
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Installation & Getting Started
 
-### 📥 For Users (Recommended)
-You can download the latest pre-compiled version of **Telegram-Parallel** directly from the **[Releases](https://github.com/CodeWithTanim/Telegram-Parallel/releases)** section. 
-1. Download the `Telegram-Parallel-Setup-x.x.x.exe`.
-2. Run the installer.
-3. Start messaging!
+### 📥 Pre-compiled Binaries (Recommended)
 
-### 💻 For Developers (Running from Source)
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/CodeWithTanim/Telegram-Parallel.git
-   ```
-2. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-3. **Run in Development Mode**:
-   ```bash
-   npm run dev
-   ```
-4. **Build Production Installer**:
-   ```bash
-   npm run build:win
-   ```
+Download the latest pre-compiled installer from the **[Releases](https://github.com/CodeWithTanim/Telegram-Parallel/releases)** page:
+
+1. Download `telegram-parallel-setup.exe`.
+2. Run the installer and launch the application.
+
+### 💻 Running from Source
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/CodeWithTanim/Telegram-Parallel.git
+cd Telegram-Parallel
+
+# 2. Install dependencies
+npm install
+
+# 3. Launch in development mode with Hot Module Replacement (HMR)
+npm run dev
+
+# 4. Run TypeScript checks across Node and Web targets
+npm run typecheck
+
+# 5. Lint codebase
+npm run lint
+
+# 6. Format codebase
+npm run format
+
+# 7. Package Windows installer
+npm run build:win
+```
 
 ---
 
-## 🧑‍💻 Meet the Developer
+## 🧑‍💻 Author & Maintainer
 
-**MD SAMIUR RAHMAN TANIM**  
+**MD SAMIUR RAHMAN TANIM**
 
 <p align="left">
   <a href="https://github.com/CodeWithTanim"><img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
@@ -115,8 +182,8 @@ You can download the latest pre-compiled version of **Telegram-Parallel** direct
 
 ## ⚖️ Disclaimer & License
 
-This application is **not** affiliated with Telegram or Telegram FZ-LLC. It is a third-party wrapper designed for personal use and multi-account management. Use this tool responsibly and in accordance with Telegram's Terms of Service.
+This application is **not** affiliated with Telegram or Telegram FZ-LLC. It is an independent open-source desktop client designed for personal and professional multi-account productivity.
 
 **Copyright © 2026 MD SAMIUR RAHMAN TANIM**
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+Distributed under the MIT License. See [LICENSE](LICENSE) for more details.
